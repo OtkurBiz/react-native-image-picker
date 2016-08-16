@@ -19,6 +19,9 @@
 
 @implementation ImagePickerManager
 
+//added stuff
+
+
 RCT_EXPORT_MODULE();
 
 RCT_EXPORT_METHOD(launchCamera:(NSDictionary *)options callback:(RCTResponseSenderBlock)callback)
