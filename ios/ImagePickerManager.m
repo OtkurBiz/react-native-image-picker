@@ -3,6 +3,7 @@
 #import <AssetsLibrary/AssetsLibrary.h>
 #import <AVFoundation/AVFoundation.h>
 #import <Photos/Photos.h>
+#import "UILabel+ActionSheet.h"
 
 @import MobileCoreServices;
 
@@ -16,6 +17,8 @@
 @property (nonatomic, strong) NSDictionary *customButtons;
 
 @end
+
+
 
 @implementation ImagePickerManager
 
@@ -40,6 +43,10 @@ RCT_EXPORT_METHOD(showImagePicker:(NSDictionary *)options callback:(RCTResponseS
 {
     self.callback = callback; // Save the callback so we can use it from the delegate methods
     self.options = options;
+    
+    UIFont *ugFont = [UIFont fontWithName:@"UKIJ Tuz Tom" size:15];
+    UILabel * appearanceLabel = [UILabel appearanceWhenContainedIn:UIAlertController.class, nil];
+    [appearanceLabel setAppearanceFont:ugFont];
 
     NSString *title = [self.options valueForKey:@"title"];
     if ([title isEqual:[NSNull null]] || title.length == 0) {

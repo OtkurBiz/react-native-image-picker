@@ -42,7 +42,6 @@ import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -51,6 +50,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.UUID;
+
+
 
 public class ImagePickerModule extends ReactContextBaseJavaModule implements ActivityEventListener {
 
@@ -133,9 +134,10 @@ public class ImagePickerModule extends ReactContextBaseJavaModule implements Act
 
     titles.add(cancelButtonTitle);
     actions.add("cancel");
+    //R.layout.alert_dialog_item;
 
     ArrayAdapter<String> adapter = new ArrayAdapter<String>(currentActivity,
-            android.R.layout.select_dialog_item, titles);
+            R.layout.alert_dialog_item, titles);
     AlertDialog.Builder builder = new AlertDialog.Builder(currentActivity);
     if (options.hasKey("title") && options.getString("title") != null && !options.getString("title").isEmpty()) {
       builder.setTitle(options.getString("title"));
@@ -163,8 +165,10 @@ public class ImagePickerModule extends ReactContextBaseJavaModule implements Act
         }
       }
     });
-
     final AlertDialog dialog = builder.create();
+    //TextView textView = (TextView) dialog.findViewById(android.R.layout.select_dialog_item);
+    //Typeface face=Typeface.createFromAsset(getAssets(),"fonts/FONT");
+    //textView.setTypeface(face);
     /**
      * override onCancel method to callback cancel in case of a touch outside of
      * the dialog or the BACK key pressed
