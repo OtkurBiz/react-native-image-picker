@@ -10,7 +10,7 @@ import android.widget.TextView;
 public class OtkurBizTextView extends TextView {
 
     private Context mContext;
-    public static   String fontName = "assets/fonts/UKIJ Tuz Tom.ttf";
+    public static  String fontName = "fonts/UkijTuzTom.ttf";
 
     public String getFontName() {
         return fontName;

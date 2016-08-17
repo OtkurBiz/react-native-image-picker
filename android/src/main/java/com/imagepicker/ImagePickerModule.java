@@ -11,6 +11,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapFactory.Options;
 import android.graphics.Matrix;
+import android.graphics.Typeface;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Environment;
@@ -20,6 +21,7 @@ import android.util.Base64;
 import android.widget.ArrayAdapter;
 import android.webkit.MimeTypeMap;
 import android.content.pm.PackageManager;
+import android.widget.TextView;
 
 import com.facebook.react.bridge.ActivityEventListener;
 import com.facebook.react.bridge.Arguments;
@@ -51,6 +53,8 @@ import java.util.Locale;
 import java.util.TimeZone;
 import java.util.UUID;
 
+import biz.otkur.app.*;
+import biz.otkur.app.textview.TypeFaces;
 
 
 public class ImagePickerModule extends ReactContextBaseJavaModule implements ActivityEventListener {
@@ -140,7 +144,14 @@ public class ImagePickerModule extends ReactContextBaseJavaModule implements Act
             R.layout.alert_dialog_item, titles);
     AlertDialog.Builder builder = new AlertDialog.Builder(currentActivity);
     if (options.hasKey("title") && options.getString("title") != null && !options.getString("title").isEmpty()) {
-      builder.setTitle(options.getString("title"));
+      //builder.setTitle(options.getString("title"));
+      TextView textView = (TextView) new TextView(this.mReactContext);
+      textView.setText(options.getString("title"));
+      Typeface face = TypeFaces.get(this.mReactContext, "fonts/UkijTuzTom.ttf");
+      textView.setTypeface(face);
+      textView.setPadding(10,10,10,10);
+      textView.setTextSize(20);
+      builder.setCustomTitle(textView);
     }
 
     builder.setAdapter(adapter, new DialogInterface.OnClickListener() {
@@ -165,7 +176,12 @@ public class ImagePickerModule extends ReactContextBaseJavaModule implements Act
         }
       }
     });
+
+
+
     final AlertDialog dialog = builder.create();
+
+
     //TextView textView = (TextView) dialog.findViewById(android.R.layout.select_dialog_item);
     //Typeface face=Typeface.createFromAsset(getAssets(),"fonts/FONT");
     //textView.setTypeface(face);
