@@ -1,17 +1,17 @@
-#### _Before you open an issue_
-This library started as a basic bridge of the native iOS image picker, and I want to keep it that way. As such, functionality beyond what the native `UIImagePickerController` supports will not be supported here. **Multiple image selection, more control over the crop tool, and landscape support** are things missing from the native iOS functionality - **not issues with my library**. If you need these things, [react-native-image-crop-picker](https://github.com/ivpusic/react-native-image-crop-picker) might be a better choice for you.    
 
-# react-native-image-picker
+# React Native Image Picker [![npm version](https://badge.fury.io/js/react-native-image-picker.svg)](https://badge.fury.io/js/react-native-image-picker) ![MIT](https://img.shields.io/dub/l/vibe-d.svg) ![Platform - Android and iOS](https://img.shields.io/badge/platform-Android%20%7C%20iOS-yellow.svg)
+
 A React Native module that allows you to use native UI to select a photo/video from the device library or directly from the camera, like so:
 
 iOS | Android
 ------- | ----
 <img title="iOS" src="https://github.com/marcshilling/react-native-image-picker/blob/master/images/ios-image.png"> | <img title="Android" src="https://github.com/marcshilling/react-native-image-picker/blob/master/images/android-image.png">
 
+#### _Before you open an issue_
+This library started as a basic bridge of the native iOS image picker, and I want to keep it that way. As such, functionality beyond what the native `UIImagePickerController` supports will not be supported here. **Multiple image selection, more control over the crop tool, and landscape support** are things missing from the native iOS functionality - **not issues with my library**. If you need these things, [react-native-image-crop-picker](https://github.com/ivpusic/react-native-image-crop-picker) might be a better choice for you.    
+
 ## Table of contents
 - [Install](#install)
-  - [iOS](#ios)
-  - [Android](#android)
 - [Usage](#usage)
 - [Direct launch](#directly-launching-the-camera-or-image-library)
 - [Options](#options)
@@ -21,16 +21,25 @@ iOS | Android
 
 `npm install react-native-image-picker@latest --save`
 
-Use [rnpm](https://github.com/rnpm/rnpm) to automatically complete the installation, or link manually like so:
+### Automatic Installation
 
-### iOS
+**React Native >= 0.29**
+`$react-native link`
+
+**React Native < 0.29**
+`$rnpm link`
+
+### Manual Installation
+
+#### iOS
 
 1. In the XCode's "Project navigator", right click on your project's Libraries folder ➜ `Add Files to <...>`
 2. Go to `node_modules` ➜ `react-native-image-picker` ➜ `ios` ➜ select `RNImagePicker.xcodeproj`
 3. Add `RNImagePicker.a` to `Build Phases -> Link Binary With Libraries`
-4. Compile and have fun
+4. For iOS 10+, Add the `NSPhotoLibraryUsageDescription` and `NSCameraUsageDescription` keys to your `Info.plist` with strings describing why your app needs these permissions
+5. Compile and have fun
 
-### Android
+#### Android
 ```gradle
 // file: android/settings.gradle
 ...
@@ -89,9 +98,9 @@ var ImagePicker = require('react-native-image-picker');
 // More info on all the options is below in the README...just some common use cases shown here
 var options = {
   title: 'Select Avatar',
-  customButtons: {
-    'Choose Photo from Facebook': 'fb',
-  },
+  customButtons: [
+    {name: 'fb', title: 'Choose Photo from Facebook'},
+  ],
   storageOptions: {
     skipBackup: true,
     path: 'images'
@@ -164,7 +173,7 @@ title | OK | OK | Specify `null` or empty string to remove the title
 cancelButtonTitle | OK | OK |
 takePhotoButtonTitle | OK | OK | Specify `null` or empty string to remove this button
 chooseFromLibraryButtonTitle | OK | OK | Specify `null` or empty string to remove this button
-customButtons | OK | OK | An object in the form of `[Button Text] : [String returned upon selection]`
+customButtons | OK | OK | An array containing objects with the name and title of buttons
 cameraType | OK | - | 'front' or 'back'
 mediaType | OK | OK | 'photo', 'video', or 'mixed' on iOS, 'photo' or 'video' on Android
 maxWidth | OK | OK | Photos only

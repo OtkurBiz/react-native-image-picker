@@ -14,7 +14,7 @@
 @property (nonatomic, strong) RCTResponseSenderBlock callback;
 @property (nonatomic, strong) NSDictionary *defaultOptions;
 @property (nonatomic, retain) NSMutableDictionary *options;
-@property (nonatomic, strong) NSDictionary *customButtons;
+@property (nonatomic, strong) NSArray *customButtons;
 
 @end
 
@@ -78,10 +78,11 @@ RCT_EXPORT_METHOD(showImagePicker:(NSDictionary *)options callback:(RCTResponseS
         }
 
         // Add custom buttons to action sheet
-        if ([self.options objectForKey:@"customButtons"] && [[self.options objectForKey:@"customButtons"] isKindOfClass:[NSDictionary class]]) {
+        if ([self.options objectForKey:@"customButtons"] && [[self.options objectForKey:@"customButtons"] isKindOfClass:[NSArray class]]) {
             self.customButtons = [self.options objectForKey:@"customButtons"];
-            for (NSString *key in self.customButtons) {
-                UIAlertAction *customAction = [UIAlertAction actionWithTitle:key style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
+            for (NSString *button in self.customButtons) {
+                NSString *title = [button valueForKey:@"title"];
+                UIAlertAction *customAction = [UIAlertAction actionWithTitle:title style:UIAlertActionStyleDefault handler:^(UIAlertAction * action) {
                     [self actionHandler:action];
                 }];
                 [self.alertController addAction:customAction];
@@ -115,10 +116,11 @@ RCT_EXPORT_METHOD(showImagePicker:(NSDictionary *)options callback:(RCTResponseS
     else { // iOS 7 support
         UIActionSheet *popup = [[UIActionSheet alloc] initWithTitle:title delegate:self cancelButtonTitle:cancelTitle destructiveButtonTitle:nil otherButtonTitles:takePhotoButtonTitle, chooseFromLibraryButtonTitle, nil];
 
-        if ([self.options objectForKey:@"customButtons"] && [[self.options objectForKey:@"customButtons"] isKindOfClass:[NSDictionary class]]) {
+        if ([self.options objectForKey:@"customButtons"] && [[self.options objectForKey:@"customButtons"] isKindOfClass:[NSArray class]]) {
             self.customButtons = [self.options objectForKey:@"customButtons"];
-            for (NSString *key in self.customButtons) {
-                [popup addButtonWithTitle:key];
+            for (NSString *button in self.customButtons) {
+                NSString *title = [button valueForKey:@"title"];
+                [popup addButtonWithTitle:title];
             }
         }
 
@@ -148,9 +150,12 @@ RCT_EXPORT_METHOD(showImagePicker:(NSDictionary *)options callback:(RCTResponseS
             case 1:
                 [self launchImagePicker:RNImagePickerTargetLibrarySingleImage];
                 break;
-            default:
-                self.callback(@[@{@"customButton": [self.customButtons allKeys][buttonIndex - 2]}]);
-                break;
+                default: {
+                    NSString *customButtonStr = [[self.customButtons objectAtIndex:(buttonIndex - 2)]
+                                                 objectForKey:@"name"];
+                    self.callback(@[@{@"customButton": customButtonStr}]);
+                    break;
+                }
         }
     }
 }
@@ -159,10 +164,14 @@ RCT_EXPORT_METHOD(showImagePicker:(NSDictionary *)options callback:(RCTResponseS
 - (void)actionHandler:(UIAlertAction *)action
 {
     // If button title is one of the keys in the customButtons dictionary return the value as a callback
-    NSString *customButtonStr = [self.customButtons objectForKey:action.title];
-    if (customButtonStr) {
-        self.callback(@[@{@"customButton": customButtonStr}]);
-        return;
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"title==%@", action.title];
+    NSArray *results = [self.customButtons filteredArrayUsingPredicate:predicate];
+    if (results.count > 0) {
+        NSString *customButtonStr = [[results objectAtIndex:0] objectForKey:@"name"];
+        if (customButtonStr) {
+            self.callback(@[@{@"customButton": customButtonStr}]);
+            return;
+        }
     }
 
     if ([action.title isEqualToString:[self.options valueForKey:@"takePhotoButtonTitle"]]) { // Take photo
@@ -421,7 +430,7 @@ RCT_EXPORT_METHOD(showImagePicker:(NSDictionary *)options callback:(RCTResponseS
             [response setObject:@(image.size.height) forKey:@"height"];
 
             NSDictionary *storageOptions = [self.options objectForKey:@"storageOptions"];
-            if (storageOptions && [[storageOptions objectForKey:@"cameraRoll"] boolValue] == YES) {
+            if (storageOptions && [[storageOptions objectForKey:@"cameraRoll"] boolValue] == YES && self.picker.sourceType == UIImagePickerControllerSourceTypeCamera) {
               UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil);
             }
         }
@@ -445,6 +454,18 @@ RCT_EXPORT_METHOD(showImagePicker:(NSDictionary *)options callback:(RCTResponseS
                     self.callback(@[@{@"error": error.localizedFailureReason}]);
                     return;
                 }
+            }
+            NSDictionary *storageOptions = [self.options objectForKey:@"storageOptions"];
+            if (storageOptions && [[storageOptions objectForKey:@"cameraRoll"] boolValue] == YES && self.picker.sourceType == UIImagePickerControllerSourceTypeCamera) {
+                ALAssetsLibrary *library = [[ALAssetsLibrary alloc] init];
+                [library writeVideoAtPathToSavedPhotosAlbum:videoDestinationURL completionBlock:^(NSURL *assetURL, NSError *error) {
+                    if (error) {
+                        self.callback(@[@{@"error": error.localizedFailureReason}]);
+                        return;
+                    } else {
+                        NSLog(@"Save video succeed.");
+                    }
+                }];
             }
             [response setObject:videoDestinationURL.absoluteString forKey:@"uri"];
         }
